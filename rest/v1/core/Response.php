@@ -5,7 +5,7 @@ class Response
     private $_success;
     private $_data;
     private $_toCache = false;
-    private $_toResponseData = array();
+    private $_responseData = array();
 
     public function setSuccess($success)
     {

@@ -444,6 +444,7 @@ function returnSuccess($object, $name, $query, $data = "")
     $response->setData($returnData);
     $response->send();
     exit;
+        
 }
 
 // return error

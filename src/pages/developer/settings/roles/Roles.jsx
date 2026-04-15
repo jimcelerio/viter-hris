@@ -34,7 +34,7 @@ const Roles = () => {
         </div>
         {/* PAGE CONTENT */}
         <div>
-          <RolesList />
+          <RolesList setItemEdit={setItemEdit} />
         </div>
       </Layout>
 
