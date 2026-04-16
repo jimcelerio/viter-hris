@@ -23,6 +23,7 @@ import {
   InputTextArea,
 } from "../../../../components/form-input/FormInputs";
 import ButtonSpinner from "../../../../partials/spinners/ButtonSpinner";
+import MessageError from "../../../../partials/MessageError";
 
 const ModelAddRoles = ({ itemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -58,6 +59,8 @@ const ModelAddRoles = ({ itemEdit }) => {
     ...itemEdit,
     role_name: itemEdit ? itemEdit.role_name : "",
     role_description: itemEdit ? itemEdit.role_description : "",
+
+    role_name_old: itemEdit ? itemEdit.role_name : "",
   };
   const yupSchema = Yup.object({
     role_name: Yup.string().trim().required(),
@@ -66,6 +69,10 @@ const ModelAddRoles = ({ itemEdit }) => {
   const handleClose = () => {
     dispatch(setIsAdd(false));
   };
+
+  React.useEffect(() => {
+    dispatch(setError(false));
+  }, []);
 
   return (
     <>
@@ -92,6 +99,7 @@ const ModelAddRoles = ({ itemEdit }) => {
             initialValues={initVal}
             validationSchema={yupSchema}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
+              dispatch(setError(false));
               mutation.mutate(values);
             }}
           >
@@ -116,6 +124,8 @@ const ModelAddRoles = ({ itemEdit }) => {
                           disabled={mutation.isPending}
                         />
                       </div>
+
+                      {store.error && <MessageError />}
                     </div>
                     <div className="modal-action">
                       <button
