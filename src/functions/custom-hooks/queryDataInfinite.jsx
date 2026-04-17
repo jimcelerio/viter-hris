@@ -5,7 +5,7 @@ export const queryDataInfinite = (
   urlList,
   isSearch = false,
   searchData = isSearch ? searchData : {},
-  method = "get"
+  method = "get",
 ) => {
   return queryData(isSearch ? urlSearch : urlList, method, searchData);
 };

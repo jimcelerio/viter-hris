@@ -32,12 +32,16 @@ class Employees
             $sql .= " ( ";
             $sql .= " employee_is_active, ";
             $sql .= " employee_first_name, ";
+            $sql .= " employee_middle_name, ";
+            $sql .= " employee_last_name, ";
             $sql .= " employee_email, ";
             $sql .= " employee_created, ";
             $sql .= " employee_updated ";
             $sql .= " ) values ( ";
             $sql .= " :employee_is_active, ";
             $sql .= " :employee_first_name, ";
+            $sql .= " :employee_middle_name, ";
+            $sql .= " :employee_last_name, ";
             $sql .= " :employee_email, ";
             $sql .= " :employee_created, ";
             $sql .= " :employee_updated ";
@@ -46,6 +50,8 @@ class Employees
             $query->execute([
                 "employee_is_active" => $this->employee_is_active,
                 "employee_first_name" => $this->employee_first_name,
+                "employee_middle_name" => $this->employee_middle_name,
+                "employee_last_name" => $this->employee_last_name,
                 "employee_email" => $this->employee_email,
                 "employee_created" => $this->employee_created,
                 "employee_updated" => $this->employee_updated
@@ -66,10 +72,10 @@ class Employees
             $sql .= " where true ";
             $sql .= $this->employee_is_active ? " and employee_is_active = :employee_is_active " : "";
             $sql .= $this->search != "" ? " and ( " : " ";
-            $sql .= $this->search != "" ? " employee_first_name like : employee_first_name " : " ";
-            $sql .= $this->search != "" ? " or employee_middle_name like : employee_middle_name " : " ";
-            $sql .= $this->search != "" ? " or employee_last_name like : employee_last_name " : " ";
-            $sql .= $this->search != "" ? " or employee_email like : employee_email " : " ";
+            $sql .= $this->search != "" ? " employee_first_name like :employee_first_name " : " ";
+            $sql .= $this->search != "" ? " or employee_middle_name like :employee_middle_name " : " ";
+            $sql .= $this->search != "" ? " or employee_last_name like :employee_last_name " : " ";
+            $sql .= $this->search != "" ? " or employee_email like :employee_email " : " ";
             $sql .= $this->search != "" ? " ) " : " ";
             $query = $this->connection->prepare($sql);
             $query->execute([
@@ -92,12 +98,16 @@ class Employees
         try {
             $sql = "update {$this->tblEmployees} set ";
             $sql .= "employee_first_name = :employee_first_name, ";
+            $sql .= "employee_middle_name = :employee_middle_name, ";
+            $sql .= "employee_last_name = :employee_last_name, ";
             $sql .= "employee_email = :employee_email, ";
             $sql .= "employee_updated = :employee_updated ";
             $sql .= "where employee_aid = :employee_aid ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "employee_first_name" => $this->employee_first_name,
+                "employee_middle_name" => $this->employee_middle_name,
+                "employee_last_name" => $this->employee_last_name,
                 "employee_email" => $this->employee_email,
                 "employee_updated" => $this->employee_updated,
                 "employee_aid" => $this->employee_aid
@@ -157,6 +167,41 @@ class Employees
                 "employee_first_name" => $this->employee_first_name,
 
 
+            ]);
+        } catch (PDOException $e) {
+            returnError($e);
+            $query = false;
+        }
+        return $query;
+    }
+
+    public function readLimit()
+    {
+        try {
+            $sql = "select ";
+            $sql .= " * ";
+            $sql .= " from {$this->tblEmployees} ";
+            $sql .= " where true ";
+            $sql .= $this->employee_is_active != "" ? " and employee_is_active = :employee_is_active " : "";
+            $sql .= $this->search != "" ? " and ( " : " ";
+            $sql .= $this->search != "" ? " employee_first_name like :employee_first_name " : " ";
+            $sql .= $this->search != "" ? " or employee_middle_name like :employee_middle_name " : " ";
+            $sql .= $this->search != "" ? " or employee_last_name like :employee_last_name " : " ";
+            $sql .= $this->search != "" ? " or employee_email like :employee_email " : " ";
+            $sql .= $this->search != "" ? " ) " : " ";
+            $sql .= " limit :start, ";
+            $sql .= " :total ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "start" => $this->start - 1,
+                "total" => $this->total,
+                ...$this->employee_is_active != "" ? ["employee_is_active" => $this->employee_is_active] : [],
+                ...$this->search ? [
+                    "employee_first_name" => "%{$this->search}%",
+                    "employee_middle_name" => "%{$this->search}%",
+                    "employee_last_name" => "%{$this->search}%",
+                    "employee_email" => "%{$this->search}%",
+                ] : []
             ]);
         } catch (PDOException $e) {
             returnError($e);
