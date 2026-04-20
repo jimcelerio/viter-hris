@@ -1,6 +1,6 @@
 <?php
 // // Turn off all error reporting = 0
-// // error_reporting(0);
+error_reporting(E_ALL);
 // // Report all PHP errors = E_ALL, -1
 // error_reporting(E_ALL);
 // header("Content-Type: application/json; charset=UTF-8");
