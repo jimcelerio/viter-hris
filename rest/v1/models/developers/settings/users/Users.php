@@ -154,13 +154,19 @@ class Users
         try {
             $sql = "update {$this->tblSettingsUsers} set ";
             $sql .= "users_first_name = :users_first_name, ";
+            $sql .= "users_last_name = :users_last_name, ";
+            $sql .= "users_email = :users_email, ";
             $sql .= "users_password = :users_password, ";
+            $sql .= "users_role_id = :users_role_id, ";
             $sql .= "users_updated = :users_updated ";
             $sql .= "where users_aid = :users_aid ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "users_first_name" => $this->users_first_name,
+                "users_last_name" => $this->users_last_name,
+                "users_email" => $this->users_email,
                 "users_password" => $this->users_password,
+                "users_role_id" => $this->users_role_id,
                 "users_updated" => $this->users_updated,
                 "users_aid" => $this->users_aid
             ]);
@@ -214,11 +220,13 @@ class Users
             $sql .= "users_first_name ";
             $sql .= "from {$this->tblSettingsUsers} ";
             $sql .= "where users_first_name = :users_first_name ";
+            $sql .= "or users_last_name = :users_last_name ";
+            $sql .= "or users_email = :users_email ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "users_first_name" => $this->users_first_name,
-
-
+                "users_last_name" => $this->users_last_name,
+                "users_email" => $this->users_email
             ]);
         } catch (PDOException $e) {
             returnError($e);

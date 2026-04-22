@@ -1,11 +1,11 @@
 <?php
 
 // set http header
-require '../../../../core/header.php';
+require '../../../core/header.php';
 // use needed functions
-require '../../../../core/functions.php';
+require '../../../core/functions.php';
 // use needed functions
-require '../../../../models/developers/settings/roles/Roles.php';
+require '../../../models/developers/memo/Memo.php';
 
 // get payload from frontend
 
@@ -34,6 +34,7 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
         sendResponse($result);
         exit;
     }
+
     // DELETE / DELETE
     if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         $result = require 'delete.php';

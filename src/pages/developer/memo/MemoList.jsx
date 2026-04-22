@@ -1,43 +1,45 @@
+import { useInfiniteQuery } from "@tanstack/react-query";
 import React from "react";
-import useQueryData from "../../../../functions/custom-hooks/useQueryData";
 import {
-  apiVersion,
-  formatDate,
-} from "../../../../functions/functions-general";
-import NoData from "../../../../partials/NoData";
-import FetchingSpinner from "../../../../partials/spinners/FetchingSpinner";
-import TableLoading from "../../../../partials/TableLoading";
-import { FaArchive, FaEdit, FaTrash, FaTrashRestore } from "react-icons/fa";
-import { StoreContext } from "../../../../store/StoreContext";
+  FaArchive,
+  FaEdit,
+  FaEye,
+  FaTrash,
+  FaTrashRestore,
+} from "react-icons/fa";
+import { useInView } from "react-intersection-observer";
+import { queryDataInfinite } from "../../../functions/custom-hooks/queryDataInfinite";
+import { apiVersion, formatDate } from "../../../functions/functions-general";
+import Loadmore from "../../../partials/Loadmore";
+import ModalArchive from "../../../partials/modals/ModalArchive";
+import ModalDelete from "../../../partials/modals/ModalDelete";
+import ModalRestore from "../../../partials/modals/ModalRestore";
+import NoData from "../../../partials/NoData";
+import SearchBar from "../../../partials/SearchBar";
+import ServerError from "../../../partials/ServerError";
+import FetchingSpinner from "../../../partials/spinners/FetchingSpinner";
+import Status from "../../../partials/Status";
+import TableLoading from "../../../partials/TableLoading";
 import {
   setIsAdd,
   setIsArchive,
   setIsDelete,
   setIsRestore,
-} from "../../../../store/StoreAction";
-import Status from "../../../../partials/Status";
-import ModalArchive from "../../../../partials/modals/ModalArchive";
-import ModalRestore from "../../../../partials/modals/ModalRestore";
-import ModalDelete from "../../../../partials/modals/ModalDelete";
-import { useInView } from "react-intersection-observer";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { queryDataInfinite } from "../../../../functions/custom-hooks/queryDataInfinite";
-import ServerError from "../../../../partials/ServerError";
-import Loadmore from "../../../../partials/Loadmore";
-import SearchBar from "../../../../partials/SearchBar";
+} from "../../../store/StoreAction";
+import { StoreContext } from "../../../store/StoreContext";
+import ModalViewMemo from "./ModalViewMemo";
 
-const UsersList = ({ itemEdit, setItemEdit }) => {
+const MemoList = ({ itemEdit, setItemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
 
-  // page
   const [page, setPage] = React.useState(1);
-  const [filterData, setFilterData] = React.useState(null);
+  const [filterData, setFilterData] = React.useState("");
   const [onSearch, setOnSearch] = React.useState(false);
+  const [itemView, setItemView] = React.useState(null);
   const search = React.useRef({ value: "" });
   const { ref, inView } = useInView();
   let counter = 1;
 
-  // use if with loadmore button and search bar
   const {
     data: result,
     error,
@@ -47,12 +49,11 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["users", search.current.value, store.isSearch, filterData],
+    queryKey: ["memo", search.current.value, store.isSearch, filterData],
     queryFn: async ({ pageParam = 1 }) =>
       await queryDataInfinite(
-        ``, // search endpoint
-        `${apiVersion}/controllers/developers/settings/users/page.php?start=${pageParam}`, // list endpoint
-        // store.isSearch || isFilter, // search boolean, // search boolean
+        ``,
+        `${apiVersion}/controllers/developers/memo/page.php?start=${pageParam}`,
         false,
         {
           filterData,
@@ -76,18 +77,25 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
     }
   }, [inView]);
 
+  const handleView = (item) => {
+    setItemView(item);
+  };
+
   const handleEdit = (item) => {
     dispatch(setIsAdd(true));
     setItemEdit(item);
   };
+
   const handleArchive = (item) => {
     dispatch(setIsArchive(true));
     setItemEdit(item);
   };
+
   const handleRestore = (item) => {
     dispatch(setIsRestore(true));
     setItemEdit(item);
   };
+
   const handleDelete = (item) => {
     dispatch(setIsDelete(true));
     setItemEdit(item);
@@ -100,7 +108,7 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
           <label htmlFor="">Status</label>
           <select
             onChange={(e) => setFilterData(e.target.value)}
-            value={filterData || ""}
+            value={filterData}
           >
             <option value="">All</option>
             <option value="1">Active</option>
@@ -118,22 +126,22 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
         />
       </div>
 
-      <div className="relative">
+      <div className="relative pt-4 rounded-md">
         {status !== "pending" && isFetching && <FetchingSpinner />}
         <table>
           <thead>
             <tr>
               <th>#</th>
               <th>Status</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created</th>
-              <th>Update</th>
+              <th>Date</th>
+              <th>Category</th>
+              {/* <th>From</th>
+              <th>To</th> */}
+              <th>Memo</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {/* LOADING SCREEN FOR FIRST PAGE LOAD */}
             {!error &&
               (status == "pending" || result?.pages[0]?.count == 0) && (
                 <tr>
@@ -146,7 +154,7 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
                   </td>
                 </tr>
               )}
-            {/* IF REQUEST IS FAILED THE SHOW ERROR MESSAGE */}
+
             {error && (
               <tr>
                 <td colSpan="100%" className="p-10">
@@ -154,7 +162,7 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
                 </td>
               </tr>
             )}
-            {/* ONCE DATA IS LOADED SHOW THE DATA */}
+
             {result?.pages?.map((page, key) => (
               <React.Fragment key={key}>
                 {page?.data?.map((item, key) => {
@@ -164,20 +172,26 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
                       <td>
                         <Status
                           text={`${
-                            item.users_is_active == 1 ? "active" : "inactive"
+                            item.memo_is_active == 1 ? "active" : "inactive"
                           }`}
                         />
                       </td>
-                      <td>
-                        {item.users_first_name} {item.users_last_name}
-                      </td>
-                      <td>{item.users_email}</td>
-                      <td>{item.users_role_id}</td>
-                      <td>{item.users_created}</td>
-                      <td>{item.users_updated}</td>
+                      <td>{formatDate(item.memo_date, "--")}</td>
+                      <td>{item.memo_category}</td>
+                      {/* <td>{item.memo_from}</td>
+                      <td>{item.memo_to}</td> */}
+                      <td className="max-w-95 truncate">{item.memo_text}</td>
                       <td>
                         <div className="flex items-center gap-3">
-                          {item.users_is_active == 1 ? (
+                          <button
+                            type="button"
+                            className="tooltip-action-table"
+                            data-tooltip="View"
+                            onClick={() => handleView(item)}
+                          >
+                            <FaEye />
+                          </button>
+                          {item.memo_is_active == 1 ? (
                             <>
                               <button
                                 type="button"
@@ -225,6 +239,7 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
             ))}
           </tbody>
         </table>
+
         <div className="loadmore flex justify-center flex-col items-center pb-10">
           <Loadmore
             fetchNextPage={fetchNextPage}
@@ -238,38 +253,45 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
           />
         </div>
       </div>
+
+      {itemView && (
+        <ModalViewMemo itemView={itemView} setItemView={setItemView} />
+      )}
+
       {store.isArchive && (
         <ModalArchive
-          mysqlApiArchive={`${apiVersion}/controllers/developers/settings/users/active.php?id=${itemEdit.users_aid}`}
+          mysqlApiArchive={`${apiVersion}/controllers/developers/memo/active.php?id=${itemEdit.memo_aid}`}
           msg="Are you sure you want to archive this record?"
           successMsg="Successfully archived record!"
-          item={itemEdit.users_first_name}
+          item={itemEdit.memo_category}
           dataItem={itemEdit}
-          queryKey={"users"}
+          queryKey={"memo"}
         />
       )}
+
       {store.isRestore && (
         <ModalRestore
-          mysqlApiRestore={`${apiVersion}/controllers/developers/settings/users/active.php?id=${itemEdit.users_aid}`}
+          mysqlApiRestore={`${apiVersion}/controllers/developers/memo/active.php?id=${itemEdit.memo_aid}`}
           msg="Are you sure you want to restore this record?"
           successMsg="Successfully restore record!"
-          item={itemEdit.users_first_name}
+          item={itemEdit.memo_category}
           dataItem={itemEdit}
-          queryKey={"users"}
+          queryKey={"memo"}
         />
       )}
+
       {store.isDelete && (
         <ModalDelete
-          mysqlApiDelete={`${apiVersion}/controllers/developers/settings/users/users.php?id=${itemEdit.users_aid}`}
+          mysqlApiDelete={`${apiVersion}/controllers/developers/memo/memo.php?id=${itemEdit.memo_aid}`}
           msg="Are you sure you want to delete this record?"
           successMsg="Successfully deleted!"
-          item={itemEdit.users_first_name}
+          item={itemEdit.memo_category}
           dataItem={itemEdit}
-          queryKey={"users"}
+          queryKey={"memo"}
         />
       )}
     </>
   );
 };
 
-export default UsersList;
+export default MemoList;

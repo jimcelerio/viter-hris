@@ -41,7 +41,7 @@ const ModelAddUsers = ({ itemEdit, filterArrayActiveRoles }) => {
         itemEdit
           ? "put" // put if update a records
           : "post", // and post if create a new record
-        values,
+        values
       ),
     onSuccess: (data) => {
       QueryClient.invalidateQueries({ queryKey: ["users"] });
