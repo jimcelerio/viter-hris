@@ -1,18 +1,18 @@
 <?php
 
 // set http header
-require '../../../core/header.php';
+require '../../../../core/header.php';
 // use needed functions
-require '../../../core/functions.php';
+require '../../../../core/functions.php';
 // use needed functions
-require '../../../models/developers/employees/Employees.php';
+require '../../../../models/developers/settings/department/Department.php';
 
 // get payload from frontend
-
 $body = file_get_contents("php://input");
 $data = json_decode($body, true);
 
 if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+
     // CREATE / POST
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $result = require 'create.php';
@@ -33,6 +33,7 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
         sendResponse($result);
         exit;
     }
+
     // DELETE / DELETE
     if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         $result = require 'delete.php';
@@ -41,4 +42,5 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     }
 }
 
+// return access error
 checkAccess();

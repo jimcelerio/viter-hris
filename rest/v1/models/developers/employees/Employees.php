@@ -8,6 +8,7 @@ class Employees
     public $employee_middle_name;
     public $employee_last_name;
     public $employee_email;
+    public $employee_department_id;
     public $employee_created;
     public $employee_updated;
 
@@ -25,6 +26,7 @@ class Employees
         $this->connection = $db;
         $this->tblEmployees = "employees";
     }
+
     public function create()
     {
         try {
@@ -35,6 +37,7 @@ class Employees
             $sql .= " employee_middle_name, ";
             $sql .= " employee_last_name, ";
             $sql .= " employee_email, ";
+            $sql .= " employee_department_id, ";
             $sql .= " employee_created, ";
             $sql .= " employee_updated ";
             $sql .= " ) values ( ";
@@ -43,6 +46,7 @@ class Employees
             $sql .= " :employee_middle_name, ";
             $sql .= " :employee_last_name, ";
             $sql .= " :employee_email, ";
+            $sql .= " :employee_department_id, ";
             $sql .= " :employee_created, ";
             $sql .= " :employee_updated ";
             $sql .= " ) ";
@@ -53,6 +57,7 @@ class Employees
                 "employee_middle_name" => $this->employee_middle_name,
                 "employee_last_name" => $this->employee_last_name,
                 "employee_email" => $this->employee_email,
+                "employee_department_id" => $this->employee_department_id,
                 "employee_created" => $this->employee_created,
                 "employee_updated" => $this->employee_updated
             ]);
@@ -67,10 +72,12 @@ class Employees
     {
         try {
             $sql = "select ";
-            $sql .= " * ";
+            $sql .= " employees.*, ";
+            $sql .= " settings_department.department_name ";
             $sql .= " from {$this->tblEmployees} ";
+            $sql .= " left join settings_department on employees.employee_department_id = settings_department.department_aid ";
             $sql .= " where true ";
-            $sql .= $this->employee_is_active ? " and employee_is_active = :employee_is_active " : "";
+            $sql .= $this->employee_is_active != "" ? " and employee_is_active = :employee_is_active " : "";
             $sql .= $this->search != "" ? " and ( " : " ";
             $sql .= $this->search != "" ? " employee_first_name like :employee_first_name " : " ";
             $sql .= $this->search != "" ? " or employee_middle_name like :employee_middle_name " : " ";
@@ -79,7 +86,7 @@ class Employees
             $sql .= $this->search != "" ? " ) " : " ";
             $query = $this->connection->prepare($sql);
             $query->execute([
-                ...$this->employee_is_active ? ["employee_is_active" => $this->employee_is_active] : [],
+                ...$this->employee_is_active != "" ? ["employee_is_active" => $this->employee_is_active] : [],
                 ...$this->search ? [
                     "employee_first_name" => "%{$this->search}%",
                     "employee_middle_name" => "%{$this->search}%",
@@ -101,6 +108,7 @@ class Employees
             $sql .= "employee_middle_name = :employee_middle_name, ";
             $sql .= "employee_last_name = :employee_last_name, ";
             $sql .= "employee_email = :employee_email, ";
+            $sql .= "employee_department_id = :employee_department_id, ";
             $sql .= "employee_updated = :employee_updated ";
             $sql .= "where employee_aid = :employee_aid ";
             $query = $this->connection->prepare($sql);
@@ -109,6 +117,7 @@ class Employees
                 "employee_middle_name" => $this->employee_middle_name,
                 "employee_last_name" => $this->employee_last_name,
                 "employee_email" => $this->employee_email,
+                "employee_department_id" => $this->employee_department_id,
                 "employee_updated" => $this->employee_updated,
                 "employee_aid" => $this->employee_aid
             ]);
@@ -179,8 +188,10 @@ class Employees
     {
         try {
             $sql = "select ";
-            $sql .= " * ";
+            $sql .= " employees.*, ";
+            $sql .= " settings_department.department_name ";
             $sql .= " from {$this->tblEmployees} ";
+            $sql .= " left join settings_department on employees.employee_department_id = settings_department.department_aid ";
             $sql .= " where true ";
             $sql .= $this->employee_is_active != "" ? " and employee_is_active = :employee_is_active " : "";
             $sql .= $this->search != "" ? " and ( " : " ";

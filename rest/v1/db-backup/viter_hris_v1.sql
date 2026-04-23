@@ -34,8 +34,23 @@ CREATE TABLE `employees` (
   `employee_middle_name` varchar(128) NOT NULL,
   `employee_last_name` varchar(128) NOT NULL,
   `employee_email` varchar(255) NOT NULL,
+  `employee_department_id` varchar(20) NOT NULL,
   `employee_created` datetime NOT NULL,
   `employee_updated` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `settings_department`
+--
+
+CREATE TABLE `settings_department` (
+  `department_aid` int(11) NOT NULL,
+  `department_is_active` tinyint(1) NOT NULL,
+  `department_name` varchar(200) NOT NULL,
+  `department_created` datetime NOT NULL,
+  `department_updated` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -79,6 +94,12 @@ ALTER TABLE `settings_roles`
   ADD PRIMARY KEY (`role_aid`);
 
 --
+-- Indexes for table `settings_department`
+--
+ALTER TABLE `settings_department`
+  ADD PRIMARY KEY (`department_aid`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -93,6 +114,12 @@ ALTER TABLE `employees`
 --
 ALTER TABLE `settings_roles`
   MODIFY `role_aid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+
+--
+-- AUTO_INCREMENT for table `settings_department`
+--
+ALTER TABLE `settings_department`
+  MODIFY `department_aid` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

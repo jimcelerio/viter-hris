@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // check database connection
 $conn = null;
 $conn = checkDbConnection();
@@ -12,12 +12,14 @@ if (array_key_exists("id", $_GET)) {
     $val->employee_middle_name = trim($data['employee_middle_name']);
     $val->employee_last_name = trim($data['employee_last_name']);
     $val->employee_email = trim($data['employee_email']);
-    $val->employee_created = date('Y-m-d H:i:s');
+    $val->employee_department_id = trim($data['employee_department_id']);
     $val->employee_updated = date('Y-m-d H:i:s');
 
     $employee_first_name_old = $data['employee_first_name_old'];
 
     // VALIDATIONS
+    checkPayload($data);
+    checkIndex($data, 'employee_department_id');
     checkId($val->employee_aid);
     compareName(
         $val, // models

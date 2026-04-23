@@ -14,25 +14,42 @@ import {
 } from "../../../store/StoreAction";
 import { StoreContext } from "../../../store/StoreContext";
 import {
+  InputSelect,
   InputText,
-  InputTextArea,
 } from "../../../components/form-input/FormInputs";
 import MessageError from "../../../partials/MessageError";
 import ButtonSpinner from "../../../partials/spinners/ButtonSpinner";
+import useQueryData from "../../../functions/custom-hooks/useQueryData";
 
 const ModalAddEmployees = ({ itemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
+
+  const {
+    isLoading,
+    data: dataDepartment,
+  } = useQueryData(
+    `${apiVersion}/controllers/developers/settings/department/department.php`,
+    "get",
+    "department-for-employee",
+    {},
+  );
+
+  const filterArrayActiveDepartments = dataDepartment?.data.filter(
+    (item) =>
+      item.department_is_active == 1 ||
+      item.department_aid == itemEdit?.employee_department_id,
+  );
 
   const QueryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: (values) =>
       queryData(
         itemEdit
-          ? `${apiVersion}/controllers/developers/employees/employees.php?id=${itemEdit.employee_aid}` // update records
-          : `${apiVersion}/controllers/developers/employees/employees.php`, // create records
+          ? `${apiVersion}/controllers/developers/employees/employees.php?id=${itemEdit.employee_aid}`
+          : `${apiVersion}/controllers/developers/employees/employees.php`,
         itemEdit
-          ? "put" // put if update a records
-          : "post", // and post if create a new record
+          ? "put"
+          : "post",
         values,
       ),
     onSuccess: (data) => {
@@ -56,17 +73,20 @@ const ModalAddEmployees = ({ itemEdit }) => {
     employee_middle_name: itemEdit ? itemEdit.employee_middle_name : "",
     employee_last_name: itemEdit ? itemEdit.employee_last_name : "",
     employee_email: itemEdit ? itemEdit.employee_email : "",
+    employee_department_id: itemEdit ? itemEdit.employee_department_id : "",
 
     employee_first_name_old: itemEdit ? itemEdit.employee_first_name : "",
     employee_middle_name_old: itemEdit ? itemEdit.employee_middle_name : "",
     employee_last_name_old: itemEdit ? itemEdit.employee_last_name : "",
     employee_email_old: itemEdit ? itemEdit.employee_email : "",
+    employee_department_id_old: itemEdit ? itemEdit.employee_department_id : "",
   };
   const yupSchema = Yup.object({
     employee_first_name: Yup.string().trim().required(),
     employee_middle_name: Yup.string().trim().required(),
     employee_last_name: Yup.string().trim().required(),
     employee_email: Yup.string().trim().required(),
+    employee_department_id: Yup.string().trim().required("Department is required"),
   });
 
   const handleClose = () => {
@@ -142,6 +162,27 @@ const ModalAddEmployees = ({ itemEdit }) => {
                           type="text"
                           disabled={mutation.isPending}
                         />
+                      </div>
+                      <div className="relative mb-6">
+                        <InputSelect
+                          label="Department"
+                          name="employee_department_id"
+                          type="text"
+                          disabled={mutation.isPending || isLoading}
+                        >
+                          <optgroup label="Select a department">
+                            <option value="" hidden>
+                              --
+                            </option>
+                            {filterArrayActiveDepartments?.map((item, key) => {
+                              return (
+                                <option key={key} value={item.department_aid}>
+                                  {item.department_name}
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        </InputSelect>
                       </div>
 
                       {store.error && <MessageError />}

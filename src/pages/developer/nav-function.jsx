@@ -1,4 +1,4 @@
-import { MdDashboard } from "react-icons/md";
+﻿import { MdDashboard } from "react-icons/md";
 import { devNavUrl, urlDeveloper } from "../../functions/functions-general";
 import { FaClipboardList, FaCogs, FaUsers } from "react-icons/fa";
 
@@ -37,6 +37,10 @@ export const navList = [
       {
         label: "users",
         path: `${devNavUrl}/${urlDeveloper}/settings/users`,
+      },
+      {
+        label: "department",
+        path: `${devNavUrl}/${urlDeveloper}/settings/department`,
       },
     ],
   },

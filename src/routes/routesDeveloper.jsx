@@ -1,9 +1,10 @@
-import { devNavUrl, urlDeveloper } from "../functions/functions-general";
+﻿import { devNavUrl, urlDeveloper } from "../functions/functions-general";
 import Dashboard from "../pages/developer/dashboard/dashboard";
 import Employees from "../pages/developer/employees/Employees";
 import Memo from "../pages/developer/memo/Memo";
 import Roles from "../pages/developer/settings/roles/Roles";
 import Users from "../pages/developer/settings/users/Users";
+import Department from "../pages/developer/settings/department/Department";
 
 export const routesDeveloper = [
   {
@@ -51,6 +52,14 @@ export const routesDeveloper = [
     element: (
       <>
         <Users />
+      </>
+    ),
+  },
+  {
+    path: `${devNavUrl}/${urlDeveloper}/settings/department`,
+    element: (
+      <>
+        <Department />
       </>
     ),
   },

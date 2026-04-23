@@ -1,31 +1,33 @@
 import React from "react";
-import { StoreContext } from "../../../store/StoreContext";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { queryDataInfinite } from "../../../functions/custom-hooks/queryDataInfinite";
-import { apiVersion } from "../../../functions/functions-general";
-import { useInView } from "react-intersection-observer";
-import NoData from "../../../partials/NoData";
-import ServerError from "../../../partials/ServerError";
-import TableLoading from "../../../partials/TableLoading";
-import FetchingSpinner from "../../../partials/spinners/FetchingSpinner";
-import Loadmore from "../../../partials/Loadmore";
-import Status from "../../../partials/Status";
+import {
+  apiVersion,
+  formatDate,
+} from "../../../../functions/functions-general";
+import NoData from "../../../../partials/NoData";
+import FetchingSpinner from "../../../../partials/spinners/FetchingSpinner";
+import TableLoading from "../../../../partials/TableLoading";
 import { FaArchive, FaEdit, FaTrash, FaTrashRestore } from "react-icons/fa";
+import { StoreContext } from "../../../../store/StoreContext";
 import {
   setIsAdd,
   setIsArchive,
   setIsDelete,
   setIsRestore,
-} from "../../../store/StoreAction";
-import ModalArchive from "../../../partials/modals/ModalArchive";
-import ModalRestore from "../../../partials/modals/ModalRestore";
-import ModalDelete from "../../../partials/modals/ModalDelete";
-import SearchBar from "../../../partials/SearchBar";
+} from "../../../../store/StoreAction";
+import Status from "../../../../partials/Status";
+import ModalArchive from "../../../../partials/modals/ModalArchive";
+import ModalRestore from "../../../../partials/modals/ModalRestore";
+import ModalDelete from "../../../../partials/modals/ModalDelete";
+import { useInView } from "react-intersection-observer";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { queryDataInfinite } from "../../../../functions/custom-hooks/queryDataInfinite";
+import ServerError from "../../../../partials/ServerError";
+import Loadmore from "../../../../partials/Loadmore";
+import SearchBar from "../../../../partials/SearchBar";
 
-const EmployeesList = ({ itemEdit, setItemEdit }) => {
+const DepartmentList = ({ itemEdit, setItemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
 
-  // page
   const [page, setPage] = React.useState(1);
   const [filterData, setFilterData] = React.useState(null);
   const [onSearch, setOnSearch] = React.useState(false);
@@ -33,7 +35,6 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
   const { ref, inView } = useInView();
   let counter = 1;
 
-  // use if with loadmore button and search bar
   const {
     data: result,
     error,
@@ -43,18 +44,17 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["employees", search.current.value, store.isSearch, filterData],
+    queryKey: ["department", search.current.value, store.isSearch, filterData],
     queryFn: async ({ pageParam = 1 }) =>
       await queryDataInfinite(
-        ``, // search endpoint
-        `${apiVersion}/controllers/developers/employees/page.php?start=${pageParam}`, // list endpoint
-        // store.isSearch || isFilter, // search boolean, // search boolean
+        ``,
+        `${apiVersion}/controllers/developers/settings/department/page.php?start=${pageParam}`,
         false,
         {
           filterData,
           searchValue: search?.current?.value,
         },
-        `post`,
+        `post`
       ),
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.total) {
@@ -121,14 +121,13 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
             <tr>
               <th>#</th>
               <th>Status</th>
-              <th>Employee Name</th>
-              <th>Email</th>
-              <th>Department</th>
+              <th>Department Name</th>
+              <th>Created</th>
+              <th>Date update</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {/* LOADING SCREEN FOR DATA */}
             {!error &&
               (status == "pending" || result?.pages[0]?.count == 0) && (
                 <tr>
@@ -141,7 +140,6 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
                   </td>
                 </tr>
               )}
-            {/* IF REQUEST IS FAILED THE SHOW ERROR MESSAGE */}
             {error && (
               <tr>
                 <td colSpan="100%" className="p-10">
@@ -149,24 +147,39 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
                 </td>
               </tr>
             )}
-            {/* ONCE DATA IS LOADED SHOW THE DATA */}
             {result?.pages?.map((page, key) => (
               <React.Fragment key={key}>
-                {page.data?.map((item, key2) => {
+                {page?.data?.map((item, key2) => {
                   return (
                     <tr key={key2}>
                       <td>{counter++}.</td>
                       <td>
                         <Status
-                          text={`${item.employee_is_active == 1 ? "active" : "inactive"}`}
+                          text={`${
+                            item.department_is_active == 1
+                              ? "active"
+                              : "inactive"
+                          }`}
                         />
                       </td>
-                      <td>{`${item.employee_first_name} ${item.employee_last_name}`}</td>
-                      <td>{item.employee_email}</td>
-                      <td>{item.department_name || "--"}</td>
+                      <td>{item.department_name}</td>
+                      <td>
+                        {formatDate(
+                          item.department_created,
+                          "--",
+                          "short-date"
+                        )}
+                      </td>
+                      <td>
+                        {formatDate(
+                          item.department_updated,
+                          "--",
+                          "short-date"
+                        )}
+                      </td>
                       <td>
                         <div className="flex items-center gap-3">
-                          {item.employee_is_active == 1 ? (
+                          {item.department_is_active == 1 ? (
                             <>
                               <button
                                 type="button"
@@ -230,38 +243,38 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
 
       {store.isArchive && (
         <ModalArchive
-          mysqlApiArchive={`${apiVersion}/controllers/developers/employees/active.php?id=${itemEdit.employee_aid}`}
+          mysqlApiArchive={`${apiVersion}/controllers/developers/settings/department/active.php?id=${itemEdit.department_aid}`}
           msg="Are you sure you want to archive this record?"
           successMsg="Successfully archived record!"
-          item={itemEdit.employee_first_name}
+          item={itemEdit.department_name}
           dataItem={itemEdit}
-          queryKey={"employees"}
+          queryKey={"department"}
         />
       )}
 
       {store.isRestore && (
         <ModalRestore
-          mysqlApiRestore={`${apiVersion}/controllers/developers/employees/active.php?id=${itemEdit.employee_aid}`}
+          mysqlApiRestore={`${apiVersion}/controllers/developers/settings/department/active.php?id=${itemEdit.department_aid}`}
           msg="Are you sure you want to restore this record?"
           successMsg="Successfully restore record!"
-          item={itemEdit.employee_first_name}
+          item={itemEdit.department_name}
           dataItem={itemEdit}
-          queryKey={"employees"}
+          queryKey={"department"}
         />
       )}
 
       {store.isDelete && (
         <ModalDelete
-          mysqlApiDelete={`${apiVersion}/controllers/developers/employees/delete.php?id=${itemEdit.employee_aid}`}
+          mysqlApiDelete={`${apiVersion}/controllers/developers/settings/department/delete.php?id=${itemEdit.department_aid}`}
           msg="Are you sure you want to delete this record?"
           successMsg="Successfully deleted!"
-          item={itemEdit.employee_first_name}
+          item={itemEdit.department_name}
           dataItem={itemEdit}
-          queryKey={"employees"}
+          queryKey={"department"}
         />
       )}
     </>
   );
 };
 
-export default EmployeesList;
+export default DepartmentList;
