@@ -58,7 +58,7 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
           filterData,
           searchValue: search?.current?.value,
         },
-        `post`
+        `post`,
       ),
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.total) {
@@ -130,6 +130,7 @@ const UsersList = ({ itemEdit, setItemEdit }) => {
               <th>Role</th>
               <th>Created</th>
               <th>Update</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>

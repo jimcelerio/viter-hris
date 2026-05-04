@@ -2,6 +2,7 @@
 
 require 'Database.php';
 require 'Response.php';
+// require_once 'env.php';
 
 function sendResponse($result)
 {
