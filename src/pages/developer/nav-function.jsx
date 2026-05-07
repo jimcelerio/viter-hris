@@ -46,6 +46,10 @@ export const navList = [
         label: "notification",
         path: `${devNavUrl}/${urlDeveloper}/settings/notification`,
       },
+      {
+        label: "direct report",
+        path: `${devNavUrl}/${urlDeveloper}/settings/direct-report`,
+      },
     ],
   },
 ];

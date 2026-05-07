@@ -35,6 +35,7 @@ const ModalAddMemo = ({ itemEdit }) => {
       ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["memo"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-memo"] });
 
       if (data.success) {
         dispatch(setSuccess(true));

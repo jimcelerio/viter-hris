@@ -7,6 +7,8 @@ class Employees
     public $employee_first_name;
     public $employee_middle_name;
     public $employee_last_name;
+    public $employee_birthday;
+    public $employee_start_work_date;
     public $employee_email;
     public $employee_department_id;
     public $employee_created;
@@ -36,7 +38,13 @@ class Employees
             $sql .= " employee_first_name, ";
             $sql .= " employee_middle_name, ";
             $sql .= " employee_last_name, ";
+            $sql .= " employee_birthday, ";
+            $sql .= " employee_start_work_date, ";
             $sql .= " employee_email, ";
+            $sql .= " employee_supervisor_id, ";
+            $sql .= " employee_supervisor_first_name, ";
+            $sql .= " employee_supervisor_last_name, ";
+            $sql .= " employee_supervisor_email, ";
             $sql .= " employee_department_id, ";
             $sql .= " employee_created, ";
             $sql .= " employee_updated ";
@@ -45,7 +53,13 @@ class Employees
             $sql .= " :employee_first_name, ";
             $sql .= " :employee_middle_name, ";
             $sql .= " :employee_last_name, ";
+            $sql .= " :employee_birthday, ";
+            $sql .= " :employee_start_work_date, ";
             $sql .= " :employee_email, ";
+            $sql .= " :employee_supervisor_id, ";
+            $sql .= " :employee_supervisor_first_name, ";
+            $sql .= " :employee_supervisor_last_name, ";
+            $sql .= " :employee_supervisor_email, ";
             $sql .= " :employee_department_id, ";
             $sql .= " :employee_created, ";
             $sql .= " :employee_updated ";
@@ -56,7 +70,13 @@ class Employees
                 "employee_first_name" => $this->employee_first_name,
                 "employee_middle_name" => $this->employee_middle_name,
                 "employee_last_name" => $this->employee_last_name,
+                "employee_birthday" => $this->employee_birthday,
+                "employee_start_work_date" => $this->employee_start_work_date,
                 "employee_email" => $this->employee_email,
+                "employee_supervisor_id" => "",
+                "employee_supervisor_first_name" => "",
+                "employee_supervisor_last_name" => "",
+                "employee_supervisor_email" => "",
                 "employee_department_id" => $this->employee_department_id,
                 "employee_created" => $this->employee_created,
                 "employee_updated" => $this->employee_updated
@@ -107,6 +127,8 @@ class Employees
             $sql .= "employee_first_name = :employee_first_name, ";
             $sql .= "employee_middle_name = :employee_middle_name, ";
             $sql .= "employee_last_name = :employee_last_name, ";
+            $sql .= "employee_birthday = :employee_birthday, ";
+            $sql .= "employee_start_work_date = :employee_start_work_date, ";
             $sql .= "employee_email = :employee_email, ";
             $sql .= "employee_department_id = :employee_department_id, ";
             $sql .= "employee_updated = :employee_updated ";
@@ -116,6 +138,8 @@ class Employees
                 "employee_first_name" => $this->employee_first_name,
                 "employee_middle_name" => $this->employee_middle_name,
                 "employee_last_name" => $this->employee_last_name,
+                "employee_birthday" => $this->employee_birthday,
+                "employee_start_work_date" => $this->employee_start_work_date,
                 "employee_email" => $this->employee_email,
                 "employee_department_id" => $this->employee_department_id,
                 "employee_updated" => $this->employee_updated,

@@ -54,6 +54,7 @@ const ModalAddEmployees = ({ itemEdit }) => {
       ),
     onSuccess: (data) => {
       QueryClient.invalidateQueries({ queryKey: ["employees"] });
+      QueryClient.invalidateQueries({ queryKey: ["dashboard-employees"] });
 
       if (data.success) {
         dispatch(setSuccess(true));
@@ -72,12 +73,16 @@ const ModalAddEmployees = ({ itemEdit }) => {
     employee_first_name: itemEdit ? itemEdit.employee_first_name : "",
     employee_middle_name: itemEdit ? itemEdit.employee_middle_name : "",
     employee_last_name: itemEdit ? itemEdit.employee_last_name : "",
+    employee_birthday: itemEdit ? itemEdit.employee_birthday : "",
+    employee_start_work_date: itemEdit ? itemEdit.employee_start_work_date : "",
     employee_email: itemEdit ? itemEdit.employee_email : "",
     employee_department_id: itemEdit ? itemEdit.employee_department_id : "",
 
     employee_first_name_old: itemEdit ? itemEdit.employee_first_name : "",
     employee_middle_name_old: itemEdit ? itemEdit.employee_middle_name : "",
     employee_last_name_old: itemEdit ? itemEdit.employee_last_name : "",
+    employee_birthday_old: itemEdit ? itemEdit.employee_birthday : "",
+    employee_start_work_date_old: itemEdit ? itemEdit.employee_start_work_date : "",
     employee_email_old: itemEdit ? itemEdit.employee_email : "",
     employee_department_id_old: itemEdit ? itemEdit.employee_department_id : "",
   };
@@ -85,6 +90,10 @@ const ModalAddEmployees = ({ itemEdit }) => {
     employee_first_name: Yup.string().trim().required(),
     employee_middle_name: Yup.string().trim().required(),
     employee_last_name: Yup.string().trim().required(),
+    employee_birthday: Yup.string().trim().required("Birthday is required"),
+    employee_start_work_date: Yup.string()
+      .trim()
+      .required("Start work date is required"),
     employee_email: Yup.string().trim().required(),
     employee_department_id: Yup.string().trim().required("Department is required"),
   });
@@ -152,6 +161,22 @@ const ModalAddEmployees = ({ itemEdit }) => {
                           label="Last Name"
                           name="employee_last_name"
                           type="text"
+                          disabled={mutation.isPending}
+                        />
+                      </div>
+                      <div className="relative mb-6">
+                        <InputText
+                          label="Birthday"
+                          name="employee_birthday"
+                          type="date"
+                          disabled={mutation.isPending}
+                        />
+                      </div>
+                      <div className="relative mb-6">
+                        <InputText
+                          label="Start Work Date"
+                          name="employee_start_work_date"
+                          type="date"
                           disabled={mutation.isPending}
                         />
                       </div>

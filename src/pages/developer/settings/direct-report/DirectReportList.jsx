@@ -1,31 +1,30 @@
-import React from "react";
-import { StoreContext } from "../../../store/StoreContext";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { queryDataInfinite } from "../../../functions/custom-hooks/queryDataInfinite";
-import { apiVersion, formatDate } from "../../../functions/functions-general";
-import { useInView } from "react-intersection-observer";
-import NoData from "../../../partials/NoData";
-import ServerError from "../../../partials/ServerError";
-import TableLoading from "../../../partials/TableLoading";
-import FetchingSpinner from "../../../partials/spinners/FetchingSpinner";
-import Loadmore from "../../../partials/Loadmore";
-import Status from "../../../partials/Status";
+import React from "react";
 import { FaArchive, FaEdit, FaTrash, FaTrashRestore } from "react-icons/fa";
+import { useInView } from "react-intersection-observer";
+import { queryDataInfinite } from "../../../../functions/custom-hooks/queryDataInfinite";
+import { apiVersion, formatDate } from "../../../../functions/functions-general";
+import Loadmore from "../../../../partials/Loadmore";
+import ModalArchive from "../../../../partials/modals/ModalArchive";
+import ModalDelete from "../../../../partials/modals/ModalDelete";
+import ModalRestore from "../../../../partials/modals/ModalRestore";
+import NoData from "../../../../partials/NoData";
+import SearchBar from "../../../../partials/SearchBar";
+import ServerError from "../../../../partials/ServerError";
+import FetchingSpinner from "../../../../partials/spinners/FetchingSpinner";
+import Status from "../../../../partials/Status";
+import TableLoading from "../../../../partials/TableLoading";
 import {
   setIsAdd,
   setIsArchive,
   setIsDelete,
   setIsRestore,
-} from "../../../store/StoreAction";
-import ModalArchive from "../../../partials/modals/ModalArchive";
-import ModalRestore from "../../../partials/modals/ModalRestore";
-import ModalDelete from "../../../partials/modals/ModalDelete";
-import SearchBar from "../../../partials/SearchBar";
+} from "../../../../store/StoreAction";
+import { StoreContext } from "../../../../store/StoreContext";
 
-const EmployeesList = ({ itemEdit, setItemEdit }) => {
+const DirectReportList = ({ itemEdit, setItemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
 
-  // page
   const [page, setPage] = React.useState(1);
   const [filterData, setFilterData] = React.useState(null);
   const [onSearch, setOnSearch] = React.useState(false);
@@ -33,7 +32,6 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
   const { ref, inView } = useInView();
   let counter = 1;
 
-  // use if with loadmore button and search bar
   const {
     data: result,
     error,
@@ -43,18 +41,17 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["employees", search.current.value, store.isSearch, filterData],
+    queryKey: ["direct-report", search.current.value, store.isSearch, filterData],
     queryFn: async ({ pageParam = 1 }) =>
       await queryDataInfinite(
-        ``, // search endpoint
-        `${apiVersion}/controllers/developers/employees/page.php?start=${pageParam}`, // list endpoint
-        // store.isSearch || isFilter, // search boolean, // search boolean
+        ``,
+        `${apiVersion}/controllers/developers/settings/direct-report/page.php?start=${pageParam}`,
         false,
         {
           filterData,
           searchValue: search?.current?.value,
         },
-        `post`,
+        `post`
       ),
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.total) {
@@ -121,30 +118,25 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
             <tr>
               <th>#</th>
               <th>Status</th>
-              <th>Employee Name</th>
-              <th>Email</th>
-              <th>Department</th>
+              <th>Name (Employee)</th>
               <th>Supervisor</th>
-              <th>Birthday</th>
-              <th>Start Work Date</th>
+              <th>Created</th>
+              <th>Date update</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {/* LOADING SCREEN FOR DATA */}
-            {!error &&
-              (status == "pending" || result?.pages[0]?.count == 0) && (
-                <tr>
-                  <td colSpan="100%" className="p-10">
-                    {status == "pending" ? (
-                      <TableLoading cols={2} count={20} />
-                    ) : (
-                      <NoData />
-                    )}
-                  </td>
-                </tr>
-              )}
-            {/* IF REQUEST IS FAILED THE SHOW ERROR MESSAGE */}
+            {!error && (status == "pending" || result?.pages[0]?.count == 0) && (
+              <tr>
+                <td colSpan="100%" className="p-10">
+                  {status == "pending" ? (
+                    <TableLoading cols={2} count={20} />
+                  ) : (
+                    <NoData />
+                  )}
+                </td>
+              </tr>
+            )}
             {error && (
               <tr>
                 <td colSpan="100%" className="p-10">
@@ -152,38 +144,34 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
                 </td>
               </tr>
             )}
-            {/* ONCE DATA IS LOADED SHOW THE DATA */}
             {result?.pages?.map((page, key) => (
               <React.Fragment key={key}>
-                {page.data?.map((item, key2) => {
+                {page?.data?.map((item, key2) => {
                   return (
                     <tr key={key2}>
                       <td>{counter++}.</td>
                       <td>
                         <Status
-                          text={`${item.employee_is_active == 1 ? "active" : "inactive"}`}
+                          text={`${
+                            item.direct_report_is_active == 1 ? "active" : "inactive"
+                          }`}
                         />
                       </td>
-                      <td>{`${item.employee_first_name} ${item.employee_last_name}`}</td>
-                      <td>{item.employee_email}</td>
-                      <td>{item.department_name || "--"}</td>
                       <td>
-                        {item.employee_supervisor_first_name &&
-                        item.employee_supervisor_last_name
-                          ? `${item.employee_supervisor_first_name} ${item.employee_supervisor_last_name}${item.employee_supervisor_email ? ` (${item.employee_supervisor_email})` : ""}`
-                          : "--"}
+                        {item.subordinate_first_name} {item.subordinate_last_name}
                       </td>
-                      <td>{formatDate(item.employee_birthday, "--", "short-date")}</td>
                       <td>
-                        {formatDate(
-                          item.employee_start_work_date,
-                          "--",
-                          "short-date",
-                        )}
+                        {item.supervisor_first_name} {item.supervisor_last_name}
+                      </td>
+                      <td>
+                        {formatDate(item.direct_report_created, "--", "short-date")}
+                      </td>
+                      <td>
+                        {formatDate(item.direct_report_updated, "--", "short-date")}
                       </td>
                       <td>
                         <div className="flex items-center gap-3">
-                          {item.employee_is_active == 1 ? (
+                          {item.direct_report_is_active == 1 ? (
                             <>
                               <button
                                 type="button"
@@ -247,38 +235,38 @@ const EmployeesList = ({ itemEdit, setItemEdit }) => {
 
       {store.isArchive && (
         <ModalArchive
-          mysqlApiArchive={`${apiVersion}/controllers/developers/employees/active.php?id=${itemEdit.employee_aid}`}
+          mysqlApiArchive={`${apiVersion}/controllers/developers/settings/direct-report/active.php?id=${itemEdit.direct_report_aid}`}
           msg="Are you sure you want to archive this record?"
           successMsg="Successfully archived record!"
-          item={itemEdit.employee_first_name}
+          item={`${itemEdit.subordinate_first_name} ${itemEdit.subordinate_last_name}`}
           dataItem={itemEdit}
-          queryKey={"employees"}
+          queryKey={"direct-report"}
         />
       )}
 
       {store.isRestore && (
         <ModalRestore
-          mysqlApiRestore={`${apiVersion}/controllers/developers/employees/active.php?id=${itemEdit.employee_aid}`}
+          mysqlApiRestore={`${apiVersion}/controllers/developers/settings/direct-report/active.php?id=${itemEdit.direct_report_aid}`}
           msg="Are you sure you want to restore this record?"
           successMsg="Successfully restore record!"
-          item={itemEdit.employee_first_name}
+          item={`${itemEdit.subordinate_first_name} ${itemEdit.subordinate_last_name}`}
           dataItem={itemEdit}
-          queryKey={"employees"}
+          queryKey={"direct-report"}
         />
       )}
 
       {store.isDelete && (
         <ModalDelete
-          mysqlApiDelete={`${apiVersion}/controllers/developers/employees/delete.php?id=${itemEdit.employee_aid}`}
+          mysqlApiDelete={`${apiVersion}/controllers/developers/settings/direct-report/delete.php?id=${itemEdit.direct_report_aid}`}
           msg="Are you sure you want to delete this record?"
           successMsg="Successfully deleted!"
-          item={itemEdit.employee_first_name}
+          item={`${itemEdit.subordinate_first_name} ${itemEdit.subordinate_last_name}`}
           dataItem={itemEdit}
-          queryKey={"employees"}
+          queryKey={"direct-report"}
         />
       )}
     </>
   );
 };
 
-export default EmployeesList;
+export default DirectReportList;
